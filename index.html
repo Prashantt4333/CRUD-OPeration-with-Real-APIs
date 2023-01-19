@@ -12,49 +12,82 @@
     </style>
   </head>
   <body>
-    <div class="container">
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel"></h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Update</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container mt-5 ">
       <div class="row">
         <div class="col-4 tbdr">
-          <form>
+          <form onsubmit="sendMyData(this); return false">
             <div class="mb-3">
-              <label for="exampleInputEmail1" class="form-label">Email address</label>
-              <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+              <label for="Fname" class="form-label">First Name </label>
+              <input autofocus type="text" class="form-control" id="Fname" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+              <label for="Lname" class="form-label">Last Name </label>
+              <input type="text" class="form-control" id="Lname" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+              <label for="e_mail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="e_mail">
               <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-            </div>
-            <div class="mb-3">
-              <label for="exampleInputPassword1" class="form-label">Password</label>
-              <input type="password" class="form-control" id="exampleInputPassword1">
-            </div>
-            <div class="mb-3 form-check">
-              <input type="checkbox" class="form-check-input" id="exampleCheck1">
-              <label class="form-check-label" for="exampleCheck1">Check me out</label>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
         </div>
         <div class="col-8 tbdr">
-          <table class="table myTable">
+          <table class="table myTable ">
             <thead>
               <tr>
                 <th scope="col">id</th>
-                <th scope="col">First</th>
-                <th scope="col">Last</th>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
                 <th scope="col">Email</th>
                 <th scope="col">Actions</th>
               </tr>
             </thead>
             <tbody class="tbdy">
-             
+                <tr>
+                  <td colspan="5">
+                    <div class="d-flex justify-content-center">
+                      <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    </div>  
+                  </td>
+                </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
- 
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
  
     <script>
         let tr ='';
+        let x = document.querySelector('table.myTable > tbody');
+        let bdy = document.querySelector('body');
+        let url = "https://reqres.in";
+        let modaltitle = document.querySelector('div.modal h1.modal-title');
+        let modalbody = document.querySelector('div.modal div.modal-body'); 
+
         // Promiss chain
 
         //Promiss Object
@@ -68,9 +101,7 @@
         .then((data) => console.log(data));
       
       */
-      let x = document.querySelector('table.myTable > tbody')
-
-      fetch('https://reqres.in/api/users?page=2')
+      fetch(url+'/api/users?page=2')
       .then((response)=>{     // response is a formal argument 
             //Every Function Return Something
             // To make data readable
@@ -84,14 +115,14 @@
           for (variable of data.data) {
             // code block to be executed
             tr = tr + ` <tr>
-                          <th scope="row">${variable.id}</th>
+                          <td>${variable.id}</td>
                           <td>${variable.first_name}</td>
                           <td>${variable.last_name}</td>
                           <td>${variable.email}</td>
                           <td>
-                            <button class="btn btn-sm btn-success">View</button> 
-                            <button class="btn btn-sm btn-primary">Update</button> 
-                            <button class="btn btn-sm btn-danger">Delete</button> 
+                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="viewModal(this)">View</button> 
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="editModal(this)">Update</button> 
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser(this)">Delete</button> 
                           </td>
                           
                         </tr>
@@ -105,8 +136,151 @@
       .catch(function(err){
         console.log(err)
       });
+      //Fat Arrow  ES6 2015
 
 
+        let viewModal = (elm) =>{ //elem is  Formal argument 
+            console.log(elm)
+            modaltitle.innerHTML = 'View Modal';
+            let Eml   = elm.closest('td').previousElementSibling.innerHTML;
+            let Lname = elm.closest('td').previousElementSibling.previousElementSibling.innerHTML;
+            let Fname = elm.closest('td').previousElementSibling.previousElementSibling.previousElementSibling.innerHTML;
+            let Uid = elm.closest('td').previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.innerHTML;
+
+
+            //string.toUpperCase();
+            modalbody.innerHTML = `<ul class="list-group">
+                                    <li class="nav m-2">Id</li>
+                                    <li class="list-group-item">${Uid}</li>
+                                    <li class="nav m-2">First Name</li>
+                                    <li class="list-group-item">${Fname.toUpperCase()}</li>
+                                    <li class="nav m-2">Last Name</li>
+                                    <li class="list-group-item">${Lname.toUpperCase()}</li>
+                                    <li class="nav m-2">Email</li>
+                                    <li class="list-group-item">${Eml.toUpperCase()}</li>
+
+                                    
+                                  </ul>`;
+        }
+        let editModal = (elm) =>{ //elem is  Formal argument 
+            console.log(elm)
+            modaltitle.innerHTML  = 'Update Modal';
+            modalbody.innerHTML   = ` <form>
+                                        <div class="mb-3">
+                                          <label for="exampleInputEmail1" class="form-label">First Name</label>
+                                          <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                                        </div>
+                                        <div class="mb-3">
+                                          <label for="exampleInputPassword1" class="form-label">Last Name</label>
+                                          <input type="text" class="form-control" id="exampleInputPassword1">
+                                        </div>
+                                      </form>`;
+        }
+
+
+      
+      let deleteUser = (element) => {
+          console.log(element)
+          const swalWithBootstrapButtons = Swal.mixin({
+          customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'btn btn-danger'
+          },
+          buttonsStyling: false
+        })
+        swalWithBootstrapButtons.fire({
+          title: 'Are you sure?',
+          text: "You wan't to delete this file!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'No, cancel!',
+          reverseButtons: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+
+            // Call your API Here 
+            let deled = element.closest("tr").querySelector('td:first-child').innerHTML;
+
+            fetch(`${url}/api/users/${deled}`,{
+              method : "DELETE"
+            })
+            .then((data) => {
+              console.log(data)
+              element.closest('tr').remove()
+              swalWithBootstrapButtons.fire(
+                'Deleted!',
+                'Your file has been deleted.',
+                'success'
+              ) 
+            })
+            .catch((err) => {
+                console.log(err )
+            });
+          } else if (
+            /* Read more about handling dismissals below */
+            result.dismiss === Swal.DismissReason.cancel
+          ) {
+            swalWithBootstrapButtons.fire(
+              'Cancelled',
+              'Your file is safe ',
+              'error'
+            )
+          }
+        })
+      }
+      let sendMyData = (elem)=>{
+        let fn = elem.querySelector('input#Fname').value;
+        let ln = elem.querySelector('input#Lname').value;
+        let Eml = elem.querySelector('input#e_mail').value;
+
+        if( fn === '' || ln === '' || Eml === '' ){
+          swal("Pleas Fill The Data !", "You clicked the button!", "error");
+        }
+        else{
+             bdy.innerHTML += `
+                              <div class="d-flex justify-content-center position-fixed top-50 start-50 loadspinner">
+                                <div class="spinner-grow text-success" role="status">
+                                </div>
+                              </div>
+                            `;
+            console.log(elem)
+            console.log(elem.querySelector('input#Fname').value)
+            console.log(elem.querySelector('input#Lname').value)
+            console.log(elem.querySelector('input#e_mail').value)
+          // alert("okksuieryt78o204kkk")
+
+          let jsondata ={
+
+                "first_name":fn,
+                "last_name":ln,
+                "email": Eml,
+            }
+            console.log( typeof jsondata)
+            console.log( typeof JSON.stringify(jsondata))
+            fetch(url+'/api/users',{
+              method: 'POST',
+
+              headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: JSON.stringify(jsondata)
+            })
+            .then((res) =>{
+                return res.json(); 
+            })
+            .then( (data) => {
+                console.log(data)
+                //alert(' Data Saved Successfully')
+              swal("Data Saved Successfully!", "You clicked the button!", "success");
+              document.querySelector('.loadspinner').remove();
+            })
+            .catch((error) => {
+              console.log(error)
+            });
+        }
+      }
     </script>
   </body>
 </html>
